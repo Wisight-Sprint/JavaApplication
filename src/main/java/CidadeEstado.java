@@ -1,4 +1,4 @@
-package project.src.main.java;
+package src.main.java;
 
 public class CidadeEstado {
     private String cidade;
