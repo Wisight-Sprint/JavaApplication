@@ -1,4 +1,4 @@
-package log.src.main.java;
+package project.src.main.java;
 
 public class Usuario {
     private String nome;
