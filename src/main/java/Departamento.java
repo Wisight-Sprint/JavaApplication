@@ -1,4 +1,4 @@
-package project.src.main.java;
+package src.main.java;
 
 public class Departamento {
     private String nome;
