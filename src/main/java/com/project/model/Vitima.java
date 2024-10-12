@@ -1,4 +1,4 @@
-package src.main.java;
+package com.project.model;
 
 public class Vitima {
     private Integer idade;
