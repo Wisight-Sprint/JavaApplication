@@ -1,5 +1,6 @@
-package com.project.config;
+package com.project.provider;
 
+import com.project.config.Config;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 

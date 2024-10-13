@@ -1,5 +1,6 @@
-package com.project.provider;
+package com.project.services;
 
+import com.project.provider.ConnectionProviderS3;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -15,9 +16,9 @@ import java.util.UUID;
 
 public class ServiceS3 {
 
-
     private final ConnectionProviderS3 connectionProviderS3;
     private final S3Client s3Client;
+    public static String csvName;
 
     public ServiceS3(ConnectionProviderS3 connectionProviderS3) {
         this.connectionProviderS3 = connectionProviderS3;
@@ -32,7 +33,6 @@ public class ServiceS3 {
             bucketNames.add(bucket.name());
             System.out.println("Bucket: " + bucket.name());
         }
-
         downloadObjects(bucketNames.get(0));
     }
 
@@ -65,6 +65,7 @@ public class ServiceS3 {
             try (InputStream objectContent = s3Client.getObject(getObjectRequest, ResponseTransformer.toInputStream())) {
                 Files.copy(objectContent, new File(object.key()).toPath());
                 System.out.println("Arquivo baixado: " + object.key());
+                csvName = object.key();
             } catch (Exception e) {
                 System.err.println("Erro ao baixar o arquivo: " + object.key());
                 e.printStackTrace();

@@ -1,6 +1,7 @@
-import com.project.config.DBConnectionProvider;
+import com.project.provider.DBConnectionProvider;
 import com.project.provider.ConnectionProviderS3;
-import com.project.provider.ServiceS3;
+import com.project.services.ServiceS3;
+import com.project.services.TransformCsvToXlsx;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Main {
@@ -13,5 +14,8 @@ public class Main {
 
         serviceS3.listBuckets();
 
+        TransformCsvToXlsx transformCsvToXlsx = new TransformCsvToXlsx();
+
+        transformCsvToXlsx.convert();
     }
 }
