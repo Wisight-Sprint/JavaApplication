@@ -1,33 +1,25 @@
 package com.project.model;
 
 public class Vitima {
-    private Integer idade;
-    private String etinia;
+    private String idade;
+    private String etnia;
     private String genero;
     private String armamento;
 
-    public Vitima(Integer idade, String etinia, String genero, String armamento) {
-        this.idade = idade;
-        this.etinia = etinia;
-        this.genero = genero;
-        this.armamento = armamento;
-
-    }
-
-    public Integer getIdade() {
+    public String getIdade() {
         return idade;
     }
 
-    public void setIdade(Integer idade) {
+    public void setIdade(String idade) {
         this.idade = idade;
     }
 
-    public String getEtinia() {
-        return etinia;
+    public String getEtnia() {
+        return etnia;
     }
 
-    public void setEtinia(String etinia) {
-        this.etinia = etinia;
+    public void setEtnia(String etnia) {
+        this.etnia = etnia;
     }
 
     public String getGenero() {

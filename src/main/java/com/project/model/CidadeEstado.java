@@ -4,11 +4,6 @@ public class CidadeEstado {
     private String cidade;
     private String estado;
 
-    public CidadeEstado(String cidade, String estado) {
-        this.cidade = cidade;
-        this.estado = estado;
-    }
-
     public String getCidade() {
         return cidade;
     }

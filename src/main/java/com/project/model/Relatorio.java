@@ -3,15 +3,8 @@ package com.project.model;
 public class Relatorio {
     private String dataOcorrencia;
     private String fuga;
-    private Integer cameraCorporal;
+    private String cameraCorporal;
     private String problemasMentais;
-
-    public Relatorio(String dataOcorrencia, String fuga, Integer cameraCorporal, String problemasMentais) {
-        this.dataOcorrencia = dataOcorrencia;
-        this.fuga = fuga;
-        this.cameraCorporal = cameraCorporal;
-        this.problemasMentais = problemasMentais;
-    }
 
     public String getDataOcorrencia() {
         return dataOcorrencia;
@@ -29,11 +22,11 @@ public class Relatorio {
         this.fuga = fuga;
     }
 
-    public Integer getCameraCorporal() {
+    public String getCameraCorporal() {
         return cameraCorporal;
     }
 
-    public void setCameraCorporal(Integer cameraCorporal) {
+    public void setCameraCorporal(String cameraCorporal) {
         this.cameraCorporal = cameraCorporal;
     }
 
