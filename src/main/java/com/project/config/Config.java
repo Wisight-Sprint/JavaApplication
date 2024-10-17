@@ -6,8 +6,8 @@ import java.util.Properties;
 
 public class Config {
 
-    private static final String environment = "dev";
-    // private static final String environment = "prod";
+    //private static final String environment = "dev";
+     private static final String environment = "prod";
     private static final String envFile = environment == ("prod") ? "config.prod.properties" : "config.dev.properties";
 
     private static final Properties properties = new Properties();

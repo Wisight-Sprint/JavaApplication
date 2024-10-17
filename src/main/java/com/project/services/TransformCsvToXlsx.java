@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TransformCsvToXlsx {
@@ -28,29 +29,40 @@ public class TransformCsvToXlsx {
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
 
     private void inserirLinhaNoBanco (CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
-        List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade-estado WHERE cidade = ?",
+        List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
+        List<CidadeEstado> cidadesEstadoId = new ArrayList<>();
+        System.out.println(cidades);
         if (cidades.isEmpty()) {
+           // connection.update("INSERT INTO cidade_estado (cidade, estado) VALUES (?, ?) RETURNING cidade_estado_id");
+//            comando = Integer.valueOf("INSERT INTO cidade_estado (cidade, estado) VALUES (?, ?) RETURNING cidade_estado_id");
             connection.update("INSERT INTO cidade_estado (cidade, estado) VALUES (?, ?)", cidadeEstado.getCidade(), cidadeEstado.getEstado());
-            System.out.println("Linha inserida na tabela CidadeEstado com sucesso no banco.");
+//            System.out.println("Linha inserida na tabela CidadeEstado com sucesso no banco.");
+       cidadesEstadoId = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ?",
+               new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
+           // cidadeEstadoId = connection.queryForObject(sql, Integer.class,
+             //       cidadeEstado.getCidade(), cidadeEstado.getEstado());
         }
+        System.out.println(cidadesEstadoId);
 
-        connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidades.getFirst());
+
+        connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidadesEstadoId);
         System.out.println("Linha inserida na tabela Departamento com sucesso no banco.");
 
         List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                 new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
-        connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst());
+        connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0));
         System.out.println("Linha inserida na tabela Relatório com sucesso no banco.");
 
         List<Vitima> vitimas = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
-                new BeanPropertyRowMapper<>(Vitima.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst());
-        connection.update("INSERT INTO vitima (idade, etnia, genero, armamento, fk_relatorio) VALUES (?, ?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitimas.getFirst());
+                new BeanPropertyRowMapper<>(Vitima.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0));
+        connection.update("INSERT INTO vitima (idade, etnia, genero, armamento, fk_relatorio) VALUES (?, ?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitimas.get(0));
         System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
 
         cidades.clear();
         departamentos.clear();
         vitimas.clear();
+
     }
 
     public void convert() {
