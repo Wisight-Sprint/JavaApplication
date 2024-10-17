@@ -4,6 +4,7 @@ import com.project.model.*;
 import com.project.provider.DBConnectionProvider;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.List;
 
 public class TransformCsvToXlsx {
 
@@ -25,18 +27,30 @@ public class TransformCsvToXlsx {
     DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
 
-    private void inserirLinhaNoBanco(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
-        connection.update("INSERT INTO cidade_estado (cidade, estado) VALUES (?, ?)", cidadeEstado.getCidade(), cidadeEstado.getEstado());
-        System.out.println("Linha inserida na tabela CidadeEstado com sucesso no banco.");
+    private void inserirLinhaNoBanco (CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
+        List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade-estado WHERE cidade = ?",
+                new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
+        if (cidades.isEmpty()) {
+            connection.update("INSERT INTO cidade_estado (cidade, estado) VALUES (?, ?)", cidadeEstado.getCidade(), cidadeEstado.getEstado());
+            System.out.println("Linha inserida na tabela CidadeEstado com sucesso no banco.");
+        }
 
-        connection.update("INSERT INTO departamento (nome) VALUES (?)", departamento.getNome());
+        connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidades.getFirst());
         System.out.println("Linha inserida na tabela Departamento com sucesso no banco.");
 
-        connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais) VALUES (?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais());
+        List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
+                new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
+        connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst());
         System.out.println("Linha inserida na tabela Relatório com sucesso no banco.");
 
-        connection.update("INSERT INTO vitima (idade, etnia, genero, armamento) VALUES (?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
+        List<Vitima> vitimas = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
+                new BeanPropertyRowMapper<>(Vitima.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst());
+        connection.update("INSERT INTO vitima (idade, etnia, genero, armamento, fk_relatorio) VALUES (?, ?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitimas.getFirst());
         System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
+
+        cidades.clear();
+        departamentos.clear();
+        vitimas.clear();
     }
 
     public void convert() {
