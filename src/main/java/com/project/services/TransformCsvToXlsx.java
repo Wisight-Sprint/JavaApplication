@@ -28,14 +28,17 @@ public class TransformCsvToXlsx {
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
 
     private void inserirLinhaNoBanco (CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
-        List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade-estado WHERE cidade = ?",
+        List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
         if (cidades.isEmpty()) {
             connection.update("INSERT INTO cidade_estado (cidade, estado) VALUES (?, ?)", cidadeEstado.getCidade(), cidadeEstado.getEstado());
             System.out.println("Linha inserida na tabela CidadeEstado com sucesso no banco.");
+            cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ?",
+                    new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
         }
 
-        connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidades.getFirst());
+        System.out.println(cidades.get(0).getCidade_estado_id());
+        connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidades.get(0).getCidade_estado_id());
         System.out.println("Linha inserida na tabela Departamento com sucesso no banco.");
 
         List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
