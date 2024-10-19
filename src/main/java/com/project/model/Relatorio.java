@@ -5,6 +5,7 @@ public class Relatorio {
     private String fuga;
     private String cameraCorporal;
     private String problemasMentais;
+    private Integer relatorio_id;
 
     public String getDataOcorrencia() {
         return dataOcorrencia;
@@ -36,5 +37,13 @@ public class Relatorio {
 
     public void setProblemasMentais(String problemasMentais) {
         this.problemasMentais = problemasMentais;
+    }
+
+    public Integer getRelatorio_id() {
+        return relatorio_id;
+    }
+
+    public void setRelatorio_id(Integer relatorio_id) {
+        this.relatorio_id = relatorio_id;
     }
 }

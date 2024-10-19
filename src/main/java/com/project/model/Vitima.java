@@ -5,6 +5,7 @@ public class Vitima {
     private String etnia;
     private String genero;
     private String armamento;
+    private Integer vitima_id;
 
     public String getIdade() {
         return idade;
@@ -36,5 +37,13 @@ public class Vitima {
 
     public void setArmamento(String armamento) {
         this.armamento = armamento;
+    }
+
+    public Integer getVitima_id() {
+        return vitima_id;
+    }
+
+    public void setVitima_id(Integer vitima_id) {
+        this.vitima_id = vitima_id;
     }
 }

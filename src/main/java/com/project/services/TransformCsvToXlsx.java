@@ -27,7 +27,8 @@ public class TransformCsvToXlsx {
     DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
 
-    private void inserirLinhaNoBanco (CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
+    private void inserirLinhaNoBanco(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
+        //SELECT E INSERT PARA CIDADE_ESTADO
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
         if (cidades.isEmpty()) {
@@ -36,23 +37,48 @@ public class TransformCsvToXlsx {
             cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ?",
                     new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
         }
+        System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidadeEstado.getCidade_estado_id()));
+        //FIM
 
-        System.out.println(cidades.get(0).getCidade_estado_id());
-        connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidades.get(0).getCidade_estado_id());
-        System.out.println("Linha inserida na tabela Departamento com sucesso no banco.");
-
+        //SELECT E INSERT PARA DEPARTAMENTO
         List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                 new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
-        connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst());
-        System.out.println("Linha inserida na tabela Relatório com sucesso no banco.");
+        if (departamentos.isEmpty()) {
+            connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidadeEstado.getCidade_estado_id());
+            System.out.println("Linha inserida na tabela Departamento com sucesso no banco.");
+            departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
+                    new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
+        }
+        System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamento.getDepartamento_id()));
+        //FIM
 
-        List<Vitima> vitimas = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
-                new BeanPropertyRowMapper<>(Vitima.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst());
-        connection.update("INSERT INTO vitima (idade, etnia, genero, armamento, fk_relatorio) VALUES (?, ?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitimas.getFirst());
-        System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
+        //SELECT E INSERT PARA RELATORIO
+        List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
+                new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamento.getDepartamento_id());
+        if (relatorios.isEmpty()) {
+            connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamento.getDepartamento_id());
+            System.out.println("Linha inserida na tabela Relatório com sucesso no banco.");
+            relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
+                    new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamento.getDepartamento_id());
+        }
+        System.out.println("Id de relatório: %d".formatted(relatorio.getRelatorio_id()));
+        //FIM
+
+        //SELECT E INSERT PARA VITIMA
+        List<Vitima> vitimas = connection.query("SELECT vitima_id FROM vitima WHERE idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
+                new BeanPropertyRowMapper<>(Vitima.class), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
+        if (vitimas.isEmpty()) {
+            connection.update("INSERT INTO vitima (idade, etnia, genero, armamento, fk_relatorio) VALUES (?, ?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), relatorio.getRelatorio_id());
+            System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
+            vitimas = connection.query("SELECT vitima_id FROM vitima WHERE idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
+                    new BeanPropertyRowMapper<>(Vitima.class), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
+        }
+        System.out.println("Id de vítima: %d".formatted(vitima.getVitima_id()));
+        //FIM
 
         cidades.clear();
         departamentos.clear();
+        relatorios.clear();
         vitimas.clear();
     }
 
@@ -78,17 +104,28 @@ public class TransformCsvToXlsx {
                 Row currentLine = spreadsheets.createRow(lineIndex++);
                 String[] column = line.split(",");
 
-                colunaRelatorio.setDataOcorrencia(column[0].trim().toLowerCase());
-                colunaVitima.setIdade(column[2].trim().toLowerCase());
-                colunaVitima.setGenero(column[3].trim().toLowerCase());
-                colunaVitima.setArmamento(column[4].trim().toLowerCase());
-                colunaVitima.setEtnia(column[5].trim().toLowerCase());
-                colunaCidadeEstado.setCidade(column[6].trim().toLowerCase());
-                colunaCidadeEstado.setEstado(column[7].trim().toLowerCase());
-                colunaRelatorio.setFuga(column[8].trim().toLowerCase());
-                colunaRelatorio.setCameraCorporal(column[9].trim().toLowerCase());
-                colunaRelatorio.setProblemasMentais(column[10].trim().toLowerCase());
-                colunaDepartamento.setNome(column[11].trim().toLowerCase());
+                if (column[0].equals("") || column[0].equals(null)) colunaRelatorio.setDataOcorrencia("");
+                else colunaRelatorio.setDataOcorrencia(column[0].trim().toLowerCase());
+                if (column[2].equals("") || column[2].equals(null)) colunaVitima.setIdade("");
+                else colunaVitima.setIdade(column[2].trim().toLowerCase());
+                if (column[3].equals("") || column[3].equals(null)) colunaVitima.setGenero("");
+                else colunaVitima.setGenero(column[3].trim().toLowerCase());
+                if (column[4].equals("") || column[4].equals(null)) colunaVitima.setArmamento("");
+                else colunaVitima.setArmamento(column[4].trim().toLowerCase());
+                if (column[5].equals("") || column[5].equals(null)) colunaVitima.setEtnia("");
+                else colunaVitima.setEtnia(column[5].trim().toLowerCase());
+                if (column[6].equals("") || column[6].equals(null)) colunaCidadeEstado.setCidade("");
+                else colunaCidadeEstado.setCidade(column[6].trim().toLowerCase());
+                if (column[7].equals("") || column[7].equals(null)) colunaCidadeEstado.setEstado("");
+                else colunaCidadeEstado.setEstado(column[7].trim().toLowerCase());
+                if (column[8].equals("") || column[8].equals(null)) colunaRelatorio.setFuga("");
+                else colunaRelatorio.setFuga(column[8].trim().toLowerCase());
+                if (column[9].equals("") || column[9].equals(null)) colunaRelatorio.setCameraCorporal("");
+                else colunaRelatorio.setCameraCorporal(column[9].trim().toLowerCase());
+                if (column[10].equals("") || column[10].equals(null)) colunaRelatorio.setProblemasMentais("");
+                else colunaRelatorio.setProblemasMentais(column[10].trim().toLowerCase());
+                if (column[11].equals("") || column[11].equals(null)) colunaDepartamento.setNome("");
+                else colunaDepartamento.setNome(column[11].trim().toLowerCase());
 
                 inserirLinhaNoBanco(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
 
