@@ -1,17 +1,19 @@
 package com.project.model;
 
+import java.util.Date;
+
 public class Relatorio {
-    private String dataOcorrencia;
+    private Date dataOcorrencia;
     private String fuga;
-    private String cameraCorporal;
-    private String problemasMentais;
+    private Boolean cameraCorporal;
+    private Boolean problemasMentais;
     private Integer relatorio_id;
 
-    public String getDataOcorrencia() {
+    public Date getDataOcorrencia() {
         return dataOcorrencia;
     }
 
-    public void setDataOcorrencia(String dataOcorrencia) {
+    public void setDataOcorrencia(Date dataOcorrencia) {
         this.dataOcorrencia = dataOcorrencia;
     }
 
@@ -23,19 +25,19 @@ public class Relatorio {
         this.fuga = fuga;
     }
 
-    public String getCameraCorporal() {
+    public Boolean getCameraCorporal() {
         return cameraCorporal;
     }
 
-    public void setCameraCorporal(String cameraCorporal) {
+    public void setCameraCorporal(Boolean cameraCorporal) {
         this.cameraCorporal = cameraCorporal;
     }
 
-    public String getProblemasMentais() {
+    public Boolean getProblemasMentais() {
         return problemasMentais;
     }
 
-    public void setProblemasMentais(String problemasMentais) {
+    public void setProblemasMentais(Boolean problemasMentais) {
         this.problemasMentais = problemasMentais;
     }
 

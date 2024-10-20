@@ -14,6 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class TransformCsvToXlsx {
@@ -37,43 +40,43 @@ public class TransformCsvToXlsx {
             cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ?",
                     new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade());
         }
-        System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidadeEstado.getCidade_estado_id()));
+        System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.getFirst().getCidade_estado_id()));
         //FIM
 
         //SELECT E INSERT PARA DEPARTAMENTO
         List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                 new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
         if (departamentos.isEmpty()) {
-            connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidadeEstado.getCidade_estado_id());
+            connection.update("INSERT INTO departamento (nome, fk_cidade_estado) VALUES (?, ?)", departamento.getNome(), cidades.getFirst().getCidade_estado_id());
             System.out.println("Linha inserida na tabela Departamento com sucesso no banco.");
             departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                     new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
         }
-        System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamento.getDepartamento_id()));
+        System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.getFirst().getDepartamento_id()));
         //FIM
 
         //SELECT E INSERT PARA RELATORIO
         List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
-                new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamento.getDepartamento_id());
+                new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst().getDepartamento_id());
         if (relatorios.isEmpty()) {
-            connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamento.getDepartamento_id());
+            connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst().getDepartamento_id());
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco.");
             relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
-                    new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamento.getDepartamento_id());
+                    new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.getFirst().getDepartamento_id());
         }
-        System.out.println("Id de relatório: %d".formatted(relatorio.getRelatorio_id()));
+        System.out.println("Id de relatório: %d".formatted(relatorios.getFirst().getRelatorio_id()));
         //FIM
 
         //SELECT E INSERT PARA VITIMA
         List<Vitima> vitimas = connection.query("SELECT vitima_id FROM vitima WHERE idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
                 new BeanPropertyRowMapper<>(Vitima.class), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
         if (vitimas.isEmpty()) {
-            connection.update("INSERT INTO vitima (idade, etnia, genero, armamento, fk_relatorio) VALUES (?, ?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), relatorio.getRelatorio_id());
+            connection.update("INSERT INTO vitima (idade, etnia, genero, armamento, fk_relatorio, fk_departamento) VALUES (?, ?, ?, ?, ?, ?)", vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), relatorios.getFirst().getRelatorio_id(), departamentos.getFirst().getDepartamento_id());
             System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
             vitimas = connection.query("SELECT vitima_id FROM vitima WHERE idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
                     new BeanPropertyRowMapper<>(Vitima.class), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
         }
-        System.out.println("Id de vítima: %d".formatted(vitima.getVitima_id()));
+        System.out.println("Id de vítima: %d".formatted(vitimas.getFirst().getVitima_id()));
         //FIM
 
         cidades.clear();
@@ -99,32 +102,53 @@ public class TransformCsvToXlsx {
                     header.createCell(i).setCellValue(columnNames[i].trim());
                 }
             }
+            SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+
 
             while ((line = br.readLine()) != null) {
                 Row currentLine = spreadsheets.createRow(lineIndex++);
                 String[] column = line.split(",");
+                column[0] = column[0].replaceAll("\"", "");
+                column[2] = column[2].replaceAll("\"", "");
+                column[3] = column[3].replaceAll("\"", "");
+                column[4] = column[4].replaceAll("\"", "");
+                column[5] = column[5].replaceAll("\"", "");
+                column[6] = column[6].replaceAll("\"", "");
+                column[7] = column[7].replaceAll("\"", "");
+                column[8] = column[8].replaceAll("\"", "");
+                column[9] = column[9].replaceAll("\"", "");
+                column[10] = column[10].replaceAll("\"", "");
+                column[11] = column[11].replaceAll("\"", "");
 
-                if (column[0].equals("") || column[0].equals(null)) colunaRelatorio.setDataOcorrencia("");
-                else colunaRelatorio.setDataOcorrencia(column[0].trim().toLowerCase());
-                if (column[2].equals("") || column[2].equals(null)) colunaVitima.setIdade("");
-                else colunaVitima.setIdade(column[2].trim().toLowerCase());
-                if (column[3].equals("") || column[3].equals(null)) colunaVitima.setGenero("");
+                String dataString = column[0];
+
+                try {
+                    Date dataFormatada = formato.parse(dataString);
+                    if (column[0].equals("") || column[0].equals(null)) colunaRelatorio.setDataOcorrencia(new Date());
+                    else colunaRelatorio.setDataOcorrencia(dataFormatada);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                if (column[2].isBlank() || column[2].equals(null)) colunaVitima.setIdade(0);
+                else colunaVitima.setIdade(Integer.valueOf(column[2]));
+                if (column[3].isEmpty() || column[3].equals(null)) colunaVitima.setGenero("");
                 else colunaVitima.setGenero(column[3].trim().toLowerCase());
-                if (column[4].equals("") || column[4].equals(null)) colunaVitima.setArmamento("");
+                if (column[4].isEmpty() || column[4].equals(null)) colunaVitima.setArmamento("");
                 else colunaVitima.setArmamento(column[4].trim().toLowerCase());
-                if (column[5].equals("") || column[5].equals(null)) colunaVitima.setEtnia("");
+                if (column[5].isEmpty() || column[5].equals(null)) colunaVitima.setEtnia("");
                 else colunaVitima.setEtnia(column[5].trim().toLowerCase());
-                if (column[6].equals("") || column[6].equals(null)) colunaCidadeEstado.setCidade("");
+                if (column[6].isEmpty() || column[6].equals(null)) colunaCidadeEstado.setCidade("");
                 else colunaCidadeEstado.setCidade(column[6].trim().toLowerCase());
-                if (column[7].equals("") || column[7].equals(null)) colunaCidadeEstado.setEstado("");
+                if (column[7].isEmpty() || column[7].equals(null)) colunaCidadeEstado.setEstado("");
                 else colunaCidadeEstado.setEstado(column[7].trim().toLowerCase());
-                if (column[8].equals("") || column[8].equals(null)) colunaRelatorio.setFuga("");
+                if (column[8].isEmpty() || column[8].equals(null)) colunaRelatorio.setFuga("");
                 else colunaRelatorio.setFuga(column[8].trim().toLowerCase());
-                if (column[9].equals("") || column[9].equals(null)) colunaRelatorio.setCameraCorporal("");
-                else colunaRelatorio.setCameraCorporal(column[9].trim().toLowerCase());
-                if (column[10].equals("") || column[10].equals(null)) colunaRelatorio.setProblemasMentais("");
-                else colunaRelatorio.setProblemasMentais(column[10].trim().toLowerCase());
-                if (column[11].equals("") || column[11].equals(null)) colunaDepartamento.setNome("");
+                if (column[9].isEmpty() || column[9].equals(null)) colunaRelatorio.setCameraCorporal(null);
+                else colunaRelatorio.setCameraCorporal(Boolean.valueOf(column[9]));
+                if (column[10].isEmpty() || column[10].equals(null)) colunaRelatorio.setProblemasMentais(null);
+                else colunaRelatorio.setProblemasMentais(Boolean.valueOf(column[10]));
+                if (column[11].isEmpty() || column[11].equals(null)) colunaDepartamento.setNome("");
                 else colunaDepartamento.setNome(column[11].trim().toLowerCase());
 
                 inserirLinhaNoBanco(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);

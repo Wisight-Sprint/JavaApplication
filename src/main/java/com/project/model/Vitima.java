@@ -1,17 +1,17 @@
 package com.project.model;
 
 public class Vitima {
-    private String idade;
+    private Integer idade;
     private String etnia;
     private String genero;
     private String armamento;
     private Integer vitima_id;
 
-    public String getIdade() {
+    public Integer getIdade() {
         return idade;
     }
 
-    public void setIdade(String idade) {
+    public void setIdade(Integer idade) {
         this.idade = idade;
     }
 
