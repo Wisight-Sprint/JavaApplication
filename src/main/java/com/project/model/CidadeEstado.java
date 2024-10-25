@@ -3,10 +3,12 @@ package com.project.model;
 public class CidadeEstado {
     private String cidade;
     private String estado;
+    private Integer cidade_estado_id;
 
-    public CidadeEstado(String cidade, String estado) {
-        this.cidade = cidade;
-        this.estado = estado;
+    public CidadeEstado() {
+    }
+
+    public CidadeEstado(CidadeEstado colunaCidadeEstado) {
     }
 
     public String getCidade() {
@@ -23,5 +25,13 @@ public class CidadeEstado {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public Integer getCidade_estado_id() {
+        return cidade_estado_id;
+    }
+
+    public void setCidade_estado_id(Integer cidade_estado_id) {
+        this.cidade_estado_id = cidade_estado_id;
     }
 }
