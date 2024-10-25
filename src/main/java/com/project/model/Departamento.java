@@ -4,6 +4,13 @@ public class Departamento {
     private String nome;
     private Integer departamento_id;
 
+    public Departamento() {
+    }
+
+    public Departamento(Departamento colunaDepartamento) {
+    }
+
+
     public String getNome() {
         return nome;
     }

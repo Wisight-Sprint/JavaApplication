@@ -5,6 +5,11 @@ public class CidadeEstado {
     private String estado;
     private Integer cidade_estado_id;
 
+    public CidadeEstado() {
+    }
+
+    public CidadeEstado(CidadeEstado colunaCidadeEstado) {
+    }
 
     public String getCidade() {
         return cidade;

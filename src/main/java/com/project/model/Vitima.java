@@ -1,11 +1,26 @@
 package com.project.model;
 
 public class Vitima {
+    private String nome;
     private Integer idade;
     private String etnia;
     private String genero;
     private String armamento;
     private Integer vitima_id;
+
+    public Vitima() {
+    }
+
+    public Vitima(Vitima colunaVitima) {
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
     public Integer getIdade() {
         return idade;

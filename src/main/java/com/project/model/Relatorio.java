@@ -9,6 +9,12 @@ public class Relatorio {
     private Boolean problemasMentais;
     private Integer relatorio_id;
 
+    public Relatorio() {
+    }
+
+    public Relatorio(Relatorio colunaRelatorio) {
+    }
+
     public Date getDataOcorrencia() {
         return dataOcorrencia;
     }
@@ -47,5 +53,16 @@ public class Relatorio {
 
     public void setRelatorio_id(Integer relatorio_id) {
         this.relatorio_id = relatorio_id;
+    }
+
+    @Override
+    public String toString() {
+        return "Relatorio{" +
+                "dataOcorrencia=" + dataOcorrencia +
+                ", fuga='" + fuga + '\'' +
+                ", cameraCorporal=" + cameraCorporal +
+                ", problemasMentais=" + problemasMentais +
+                ", relatorio_id=" + relatorio_id +
+                '}';
     }
 }
