@@ -1,5 +1,6 @@
 package com.project.services;
 
+import com.project.config.Config;
 import com.project.model.*;
 import com.project.provider.DBConnectionProvider;
 import org.apache.poi.ss.formula.functions.T;
@@ -13,6 +14,9 @@ import java.io.FileReader;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.text.ParseException;
@@ -109,14 +113,10 @@ public class TransformCsvToXlsx {
             }
             SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
 
-
             while ((line = br.readLine()) != null) {
                 Row currentLine = spreadsheets.createRow(lineIndex++);
 
                 String[] column = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-
-//                String result = String.join(",", column).replaceAll("\"", "");
-//                column = result.split(",");
 
                 String dataString = column[0].replaceAll("\"", "");
                 if (dataString.contains("2024")) {
@@ -129,47 +129,64 @@ public class TransformCsvToXlsx {
                         e.printStackTrace();
                     }
 
-                if (column[1] == null || column[1].isBlank()) colunaVitima.setNome("");
-                else colunaVitima.setNome(column[1].replaceAll("\"", ""));
-                if (column[2] == null || column[2].isBlank()) colunaVitima.setIdade(0);
-                else colunaVitima.setIdade(Integer.valueOf(column[2].replaceAll("\"", "")));
-                if (column[3] == null || column[3].isBlank()) colunaVitima.setGenero("");
-                else colunaVitima.setGenero(column[3].trim().toLowerCase().replaceAll("\"", ""));
-                if (column[4] == null || column[4].isBlank()) colunaVitima.setArmamento("");
-                else colunaVitima.setArmamento(column[4].trim().toLowerCase().replaceAll("\"", ""));
-                if (column[5] == null || column[5].isBlank()) colunaVitima.setEtnia("");
-                else colunaVitima.setEtnia(column[5].trim().toLowerCase().replaceAll("\"", ""));
-                if (column[6] == null || column[6].isBlank()) colunaCidadeEstado.setCidade("");
-                else colunaCidadeEstado.setCidade(column[6].trim().toLowerCase().replaceAll("\"", ""));
-                if (column[7] == null || column[7].isBlank()) colunaCidadeEstado.setEstado("");
-                else colunaCidadeEstado.setEstado(column[7].trim().toLowerCase().replaceAll("\"", ""));
-                if (column[8] == null || column[8].isBlank() || column[8].equals("") || column[8].isEmpty()) colunaRelatorio.setFuga("nulo");
-                else colunaRelatorio.setFuga(column[8].trim().toLowerCase().replaceAll("\"", ""));
-                if (column[9] == null || column[9].isBlank()) colunaRelatorio.setCameraCorporal(null);
-                else colunaRelatorio.setCameraCorporal(Boolean.valueOf(column[9].replaceAll("\"", "")));
-                if (column[10] == null || column[10].isBlank()) colunaRelatorio.setProblemasMentais(null);
-                else colunaRelatorio.setProblemasMentais(Boolean.valueOf(column[10].replaceAll("\"", "")));
-                if (column[11] == null || column[11].isBlank()) colunaDepartamento.setNome("");
-                else colunaDepartamento.setNome(column[11].trim().toLowerCase().replaceAll("\"", ""));
+                    if (column[1] == null || column[1].isBlank()) colunaVitima.setNome("");
+                    else colunaVitima.setNome(column[1].replaceAll("\"", ""));
+                    if (column[2] == null || column[2].isBlank()) colunaVitima.setIdade(0);
+                    else colunaVitima.setIdade(Integer.valueOf(column[2].replaceAll("\"", "")));
+                    if (column[3] == null || column[3].isBlank()) colunaVitima.setGenero("");
+                    else colunaVitima.setGenero(column[3].trim().toLowerCase().replaceAll("\"", ""));
+                    if (column[4] == null || column[4].isBlank()) colunaVitima.setArmamento("");
+                    else colunaVitima.setArmamento(column[4].trim().toLowerCase().replaceAll("\"", ""));
+                    if (column[5] == null || column[5].isBlank()) colunaVitima.setEtnia("");
+                    else colunaVitima.setEtnia(column[5].trim().toLowerCase().replaceAll("\"", ""));
+                    if (column[6] == null || column[6].isBlank()) colunaCidadeEstado.setCidade("");
+                    else colunaCidadeEstado.setCidade(column[6].trim().toLowerCase().replaceAll("\"", ""));
+                    if (column[7] == null || column[7].isBlank()) colunaCidadeEstado.setEstado("");
+                    else colunaCidadeEstado.setEstado(column[7].trim().toLowerCase().replaceAll("\"", ""));
+                    if (column[8] == null || column[8].isBlank() || column[8].equals("") || column[8].isEmpty()) colunaRelatorio.setFuga("nulo");
+                    else colunaRelatorio.setFuga(column[8].trim().toLowerCase().replaceAll("\"", ""));
+                    if (column[9] == null || column[9].isBlank()) colunaRelatorio.setCameraCorporal(null);
+                    else colunaRelatorio.setCameraCorporal(Boolean.valueOf(column[9].replaceAll("\"", "")));
+                    if (column[10] == null || column[10].isBlank()) colunaRelatorio.setProblemasMentais(null);
+                    else colunaRelatorio.setProblemasMentais(Boolean.valueOf(column[10].replaceAll("\"", "")));
 
-                inserirLinhaNoBanco(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
+                    String [] coluna11 = new String[]{column[11]};
+                    coluna11 = line.split(",");
 
-                for (int i = 0; i < column.length; i++) {
-                    if (i == 2) i++;
-                    currentLine.createCell(i).setCellValue(column[i].trim());
+                    if (coluna11[1] == null || coluna11[1].isBlank()) colunaDepartamento.setNome("");
+                    else colunaDepartamento.setNome(coluna11[1].trim().toLowerCase().replaceAll("\"", ""));
+
+                    inserirLinhaNoBanco(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
+
+                    for (int i = 0; i < column.length; i++) {
+                        if (i == 2) i++;
+                        currentLine.createCell(i).setCellValue(column[i].trim());
+                    }
                 }
             }
-            }
 
-            String datasetName = new File(csvFile).getName();
-            String xlsxName = datasetName.substring(0, datasetName.lastIndexOf('.')) + ".xlsx";
+            System.out.println("-----------");
+            System.out.println("Inserção finalizada");
 
-            try (FileOutputStream writer = new FileOutputStream("src/" + xlsxName)) {
-                workbook.write(writer);
-                System.out.println("file XLSX created successfully: src/" + xlsxName);
-            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        Config configPath = new Config();
+        String ambiente = Config.getEenvironment();
+
+        Path caminhoArquivo;
+
+        if (ambiente.equals("dev"))
+            caminhoArquivo = Paths.get("C:\\Users\\samue\\Desktop\\SPTech-GitHub\\JavaApplication\\base-de-dados-wisight.csv");
+        else
+            caminhoArquivo = Paths.get("diretorioJar/base-de-dados-wisight.csv");
+
+        try {
+            Files.delete(caminhoArquivo);
+            System.out.println("Arquivo deletado com sucesso.");
+        } catch (Exception e) {
+            System.err.println("Erro ao deletar o arquivo: " + e.getMessage());
         }
     }
 }
