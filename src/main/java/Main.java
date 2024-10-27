@@ -1,3 +1,4 @@
+import com.project.config.Config;
 import com.project.provider.DBConnectionProvider;
 import com.project.provider.ConnectionProviderS3;
 import com.project.services.ServiceS3;
@@ -11,6 +12,9 @@ public class Main {
 
         ConnectionProviderS3 connectionProviderS3 = new ConnectionProviderS3();
         ServiceS3 serviceS3 = new ServiceS3(connectionProviderS3);
+
+        Config config = new Config();
+        Config.getAllEnviroments();
 
         serviceS3.listBuckets();
 

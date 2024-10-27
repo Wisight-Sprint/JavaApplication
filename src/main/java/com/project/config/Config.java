@@ -9,7 +9,7 @@ public class Config {
     private static final String environment = "prod"; // Alterar para "dev" quando necessário
     private static final Properties properties = new Properties();
 
-    static {
+    public static void getAllEnviroments() {
         if (environment.equals("prod")) {
             String[] variaveisAmbiente = {
                     "DBHOST", "DBPORT", "DBNAME", "DBURL", "DBDRIVER", "DBUSER", "DBPASSWORD",
