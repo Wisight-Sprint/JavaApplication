@@ -173,14 +173,14 @@ public class TransformCsvToXlsx {
         }
 
         Config configPath = new Config();
-        String ambiente = Config.getEenvironment();
+        String ambiente = Config.getEnvironment();
 
         Path caminhoArquivo;
 
-        if (ambiente.equals("dev"))
-            caminhoArquivo = Paths.get("C:\\Users\\samue\\Desktop\\SPTech-GitHub\\JavaApplication\\base-de-dados-wisight.csv");
+        if (ambiente.equals("prod"))
+            caminhoArquivo = Paths.get("/home/ubuntu/base-de-dados-wisight.csv");
         else
-            caminhoArquivo = Paths.get("diretorioJar/base-de-dados-wisight.csv");
+            caminhoArquivo = Paths.get(Config.get("DELETE.FILE.URL"));
 
         try {
             Files.delete(caminhoArquivo);
