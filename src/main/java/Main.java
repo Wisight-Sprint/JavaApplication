@@ -7,14 +7,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Main {
     public static void main(String[] args) {
+        Config config = new Config();
+        Config.getAllEnviroments();
+
         DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
         JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
 
         ConnectionProviderS3 connectionProviderS3 = new ConnectionProviderS3();
         ServiceS3 serviceS3 = new ServiceS3(connectionProviderS3);
-
-        Config config = new Config();
-        Config.getAllEnviroments();
 
         serviceS3.listBuckets();
 
