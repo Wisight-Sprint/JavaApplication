@@ -11,10 +11,10 @@ public class DBConnectionProvider {
     public DBConnectionProvider(){
         BasicDataSource basicDataSource = new BasicDataSource();
 
-        basicDataSource.setDriverClassName(Config.get("DB.DRIVER"));
-        basicDataSource.setUrl(Config.get("DB.URL"));
-        basicDataSource.setUsername(Config.get("DB.USER"));
-        basicDataSource.setPassword(Config.get("DB.PASSWORD"));
+        basicDataSource.setDriverClassName(Config.get("DBDRIVER"));
+        basicDataSource.setUrl(Config.get("DBURL"));
+        basicDataSource.setUsername(Config.get("DBUSER"));
+        basicDataSource.setPassword(Config.get("DBPASSWORD"));
 
         databaseConnection = new JdbcTemplate(basicDataSource);
     }

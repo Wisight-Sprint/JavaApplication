@@ -11,9 +11,9 @@ public class ConnectionProviderS3 {
 
     public ConnectionProviderS3() {
         this.credentials = AwsSessionCredentials.create(
-                Config.get("AWS.ACCESS.KEY.ID"),
-                Config.get("AWS.SECRET.ACCESS.KEY"),
-                Config.get("AWS.SESSION.TOKEN")
+                Config.get("AWS_ACCESS_KEY_ID"),
+                Config.get("AWS_SECRET_ACCESS_KEY"),
+                Config.get("AWS_SESSION_TOKEN")
         );
     }
 
