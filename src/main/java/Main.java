@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Main {
     public static void main(String[] args) {
-        Config config = new Config();
         Config.getAllEnviroments();
 
         DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
