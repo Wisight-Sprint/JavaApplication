@@ -178,7 +178,7 @@ public class TransformCsvToXlsx {
         Path caminhoArquivo;
 
         if (ambiente.equals("prod"))
-            caminhoArquivo = Paths.get("/home/ubuntu/base-de-dados-wisight.csv");
+            caminhoArquivo = Paths.get("/app/base-de-dados-wisight.csv");
         else
             caminhoArquivo = Paths.get(Config.get("DELETE.FILE.URL"));
 
