@@ -1,32 +1,20 @@
 package com.project.services;
 
-import com.project.config.Config;
 import com.project.model.*;
+import com.project.provider.ConnectionProviderS3;
 import com.project.provider.DBConnectionProvider;
-import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class TransformCsvToXlsx {
-    // Instâncias dos processadores de cada coluna
+public class DatasetToDatabase {
     private final CidadeEstado colunaCidadeEstado = new CidadeEstado();
     private final Departamento colunaDepartamento = new Departamento();
     private final Vitima colunaVitima = new Vitima();
@@ -34,8 +22,10 @@ public class TransformCsvToXlsx {
 
     DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
+    ConnectionProviderS3 connectionProviderS3 = new ConnectionProviderS3();
+    ServiceS3 serviceS3 = new ServiceS3(connectionProviderS3);
 
-    private void inserirLinhaNoBanco(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
+    private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
         //SELECT E INSERT PARA CIDADE_ESTADO
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
@@ -94,100 +84,81 @@ public class TransformCsvToXlsx {
         vitimas.clear();
     }
 
-    public void convert() {
-        String csvFile = ServiceS3.csvName;
+    public void extractAndInsert() {
 
-        try (Workbook workbook = new XSSFWorkbook();
-             BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+        String bucket = serviceS3.getFirstBucket();
+        String key = serviceS3.getFirstObject(bucket);
 
-            Sheet spreadsheets = workbook.createSheet("data");
-            String line;
-            int lineIndex = 0;
+        try (InputStream inputStream = serviceS3.getObjectInputStream(bucket, key);
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
 
-            if ((line = br.readLine()) != null) {
-                Row header = spreadsheets.createRow(lineIndex++);
-                String[] columnNames = line.split(",");
-                for (int i = 0; i < columnNames.length; i++) {
-                    header.createCell(i).setCellValue(columnNames[i].trim());
-                }
-            }
+            Sheet sheet = workbook.getSheetAt(0);
             SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
 
-            while ((line = br.readLine()) != null) {
-                Row currentLine = spreadsheets.createRow(lineIndex++);
 
-                String[] column = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) {
+                    continue;
+                }
 
-                String dataString = column[0].replaceAll("\"", "");
-                if (dataString.contains("2024")) {
+                String[] rowData = new String[row.getPhysicalNumberOfCells()];
 
-                    try {
-                        Date dataFormatada = formato.parse(dataString);
-                        if (column[0] == null || column[0].isBlank()) colunaRelatorio.setDataOcorrencia(new Date());
-                        else colunaRelatorio.setDataOcorrencia(dataFormatada);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
 
-                    if (column[1] == null || column[1].isBlank()) colunaVitima.setNome("");
-                    else colunaVitima.setNome(column[1].replaceAll("\"", ""));
-                    if (column[2] == null || column[2].isBlank()) colunaVitima.setIdade(0);
-                    else colunaVitima.setIdade(Integer.valueOf(column[2].replaceAll("\"", "")));
-                    if (column[3] == null || column[3].isBlank()) colunaVitima.setGenero("");
-                    else colunaVitima.setGenero(column[3].trim().toLowerCase().replaceAll("\"", ""));
-                    if (column[4] == null || column[4].isBlank()) colunaVitima.setArmamento("");
-                    else colunaVitima.setArmamento(column[4].trim().toLowerCase().replaceAll("\"", ""));
-                    if (column[5] == null || column[5].isBlank()) colunaVitima.setEtnia("");
-                    else colunaVitima.setEtnia(column[5].trim().toLowerCase().replaceAll("\"", ""));
-                    if (column[6] == null || column[6].isBlank()) colunaCidadeEstado.setCidade("");
-                    else colunaCidadeEstado.setCidade(column[6].trim().toLowerCase().replaceAll("\"", ""));
-                    if (column[7] == null || column[7].isBlank()) colunaCidadeEstado.setEstado("");
-                    else colunaCidadeEstado.setEstado(column[7].trim().toLowerCase().replaceAll("\"", ""));
-                    if (column[8] == null || column[8].isBlank() || column[8].equals("") || column[8].isEmpty()) colunaRelatorio.setFuga("nulo");
-                    else colunaRelatorio.setFuga(column[8].trim().toLowerCase().replaceAll("\"", ""));
-                    if (column[9] == null || column[9].isBlank()) colunaRelatorio.setCameraCorporal(null);
-                    else colunaRelatorio.setCameraCorporal(Boolean.valueOf(column[9].replaceAll("\"", "")));
-                    if (column[10] == null || column[10].isBlank()) colunaRelatorio.setProblemasMentais(null);
-                    else colunaRelatorio.setProblemasMentais(Boolean.valueOf(column[10].replaceAll("\"", "")));
+                for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
+                    Cell cell = row.getCell(i);
+                    String actualColumn = cell.getStringCellValue();
 
-                    String [] coluna11 = new String[]{column[11]};
-                    coluna11 = line.split(",");
+                    if (i == 0 && actualColumn.contains("2024")) {
 
-                    if (coluna11[1] == null || coluna11[1].isBlank()) colunaDepartamento.setNome("");
-                    else colunaDepartamento.setNome(coluna11[1].trim().toLowerCase().replaceAll("\"", ""));
+                        if (i == 0 && actualColumn == null || actualColumn.isBlank())
+                            colunaRelatorio.setDataOcorrencia(new Date());
+                        else {
+                            Date dataFormatada = formato.parse(actualColumn);
+                            colunaRelatorio.setDataOcorrencia(dataFormatada);
+                        }
 
-                    inserirLinhaNoBanco(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
+                        if (i == 1 && actualColumn.isBlank()) colunaVitima.setNome("");
+                        else colunaVitima.setNome(actualColumn);
+                        if (i == 2 && actualColumn.isBlank()) colunaVitima.setIdade(0);
+                        else colunaVitima.setIdade(Integer.valueOf(actualColumn));
+                        if (i == 3 && actualColumn.isBlank()) colunaVitima.setGenero("");
+                        else colunaVitima.setGenero(actualColumn);
+                        if (i == 4 && actualColumn.isBlank()) colunaVitima.setArmamento("");
+                        else colunaVitima.setArmamento(actualColumn);
+                        if (i == 5 && actualColumn.isBlank()) colunaVitima.setEtnia("");
+                        else colunaVitima.setEtnia(actualColumn);
+                        if (i == 6 && actualColumn.isBlank()) colunaCidadeEstado.setCidade("");
+                        else colunaCidadeEstado.setCidade(actualColumn);
+                        if (i == 7 && actualColumn.isBlank()) colunaCidadeEstado.setEstado("");
+                        else colunaCidadeEstado.setEstado(actualColumn);
+                        if (i == 8 && actualColumn.isBlank()) colunaRelatorio.setFuga("");
+                        else colunaRelatorio.setFuga(actualColumn);
+                        if (i == 9 && actualColumn.isBlank()) colunaRelatorio.setCameraCorporal(null);
+                        else colunaRelatorio.setCameraCorporal(Boolean.valueOf(actualColumn));
+                        if (i == 10 && actualColumn.isBlank()) colunaRelatorio.setProblemasMentais(null);
+                        else colunaRelatorio.setProblemasMentais(Boolean.valueOf(actualColumn));
 
-                    for (int i = 0; i < column.length; i++) {
-                        if (i == 2) i++;
-                        currentLine.createCell(i).setCellValue(column[i].trim());
+                        if (i == 11 && actualColumn.isBlank()) colunaDepartamento.setNome("");
+                        else {
+                            String[] column11 = actualColumn.split(",");
+                            colunaDepartamento.setNome(column11[0]);
+                        }
                     }
                 }
+                insertIntoDatabase(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
             }
-
-            System.out.println("-----------");
-            System.out.println("Inserção finalizada");
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Config configPath = new Config();
-        String ambiente = Config.getEnvironment();
+        System.out.println("-----------");
+        System.out.println("Inserção finalizada");
 
-        Path caminhoArquivo;
-
-        if (ambiente.equals("prod"))
-            caminhoArquivo = Paths.get("/app/base-de-dados-wisight.csv");
-        else
-            caminhoArquivo = Paths.get(Config.get("DELETE.FILE.URL"));
-
-        try {
-            Files.delete(caminhoArquivo);
-            System.out.println("Arquivo deletado com sucesso.");
-        } catch (Exception e) {
-            System.err.println("Erro ao deletar o arquivo: " + e.getMessage());
-        }
     }
 }
+
+
+
+
+
 

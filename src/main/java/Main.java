@@ -1,8 +1,6 @@
 import com.project.config.Config;
 import com.project.provider.DBConnectionProvider;
-import com.project.provider.ConnectionProviderS3;
-import com.project.services.ServiceS3;
-import com.project.services.TransformCsvToXlsx;
+import com.project.services.DatasetToDatabase;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Main {
@@ -12,13 +10,8 @@ public class Main {
         DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
         JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
 
-        ConnectionProviderS3 connectionProviderS3 = new ConnectionProviderS3();
-        ServiceS3 serviceS3 = new ServiceS3(connectionProviderS3);
+        DatasetToDatabase datasetToDatabase = new DatasetToDatabase();
 
-        serviceS3.listBuckets();
-
-        TransformCsvToXlsx transformCsvToXlsx = new TransformCsvToXlsx();
-
-        transformCsvToXlsx.convert();
+        datasetToDatabase.extractAndInsert();
     }
 }
