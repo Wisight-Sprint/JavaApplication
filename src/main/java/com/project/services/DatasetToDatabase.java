@@ -118,34 +118,34 @@ public class DatasetToDatabase {
 
                         if (i == 0 && actualColumn == null || actualColumn.isBlank())
                             colunaRelatorio.setDataOcorrencia(new Date());
-                        else {
+                        else if(i == 0) {
                             Date dataFormatada = formato.parse(actualColumn);
                             colunaRelatorio.setDataOcorrencia(dataFormatada);
                         }
 
-                        if (i == 1 && actualColumn.isBlank()) colunaVitima.setNome("");
-                        else colunaVitima.setNome(actualColumn);
-                        if (i == 2 && actualColumn.isBlank()) colunaVitima.setIdade(0);
-                        else colunaVitima.setIdade(Integer.valueOf(actualColumn));
-                        if (i == 3 && actualColumn.isBlank()) colunaVitima.setGenero("");
-                        else colunaVitima.setGenero(actualColumn);
-                        if (i == 4 && actualColumn.isBlank()) colunaVitima.setArmamento("");
-                        else colunaVitima.setArmamento(actualColumn);
-                        if (i == 5 && actualColumn.isBlank()) colunaVitima.setEtnia("");
-                        else colunaVitima.setEtnia(actualColumn);
-                        if (i == 6 && actualColumn.isBlank()) colunaCidadeEstado.setCidade("");
-                        else colunaCidadeEstado.setCidade(actualColumn);
-                        if (i == 7 && actualColumn.isBlank()) colunaCidadeEstado.setEstado("");
-                        else colunaCidadeEstado.setEstado(actualColumn);
-                        if (i == 8 && actualColumn.isBlank()) colunaRelatorio.setFuga("");
-                        else colunaRelatorio.setFuga(actualColumn);
-                        if (i == 9 && actualColumn.isBlank()) colunaRelatorio.setCameraCorporal(null);
-                        else colunaRelatorio.setCameraCorporal(Boolean.valueOf(actualColumn));
-                        if (i == 10 && actualColumn.isBlank()) colunaRelatorio.setProblemasMentais(null);
-                        else colunaRelatorio.setProblemasMentais(Boolean.valueOf(actualColumn));
+                        if (i == 1 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setNome("");
+                        else if(i == 1) colunaVitima.setNome(actualColumn);
+                        if (i == 2 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setIdade(0);
+                        else if(i == 2) colunaVitima.setIdade(Integer.valueOf(actualColumn));
+                        if (i == 3 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setGenero("");
+                        else if(i == 3) colunaVitima.setGenero(actualColumn);
+                        if (i == 4 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setArmamento("");
+                        else if(i == 4) colunaVitima.setArmamento(actualColumn);
+                        if (i == 5 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setEtnia("");
+                        else if(i == 5) colunaVitima.setEtnia(actualColumn);
+                        if (i == 6 && actualColumn.isBlank() || actualColumn == null) colunaCidadeEstado.setCidade("");
+                        else if(i == 6) colunaCidadeEstado.setCidade(actualColumn);
+                        if (i == 7 && actualColumn.isBlank() || actualColumn == null) colunaCidadeEstado.setEstado("");
+                        else if(i == 7) colunaCidadeEstado.setEstado(actualColumn);
+                        if (i == 8 && actualColumn.isBlank() || actualColumn == null) colunaRelatorio.setFuga("");
+                        else if(i == 8) colunaRelatorio.setFuga(actualColumn);
+                        if (i == 9 && actualColumn.isBlank() || actualColumn == null) colunaRelatorio.setCameraCorporal(null);
+                        else if(i == 9) colunaRelatorio.setCameraCorporal(Boolean.valueOf(actualColumn));
+                        if (i == 10 && actualColumn.isBlank() || actualColumn == null) colunaRelatorio.setProblemasMentais(null);
+                        else if(i == 10) colunaRelatorio.setProblemasMentais(Boolean.valueOf(actualColumn));
 
-                        if (i == 11 && actualColumn.isBlank()) colunaDepartamento.setNome("");
-                        else {
+                        if (i == 11 && actualColumn.isBlank() || actualColumn == null) colunaDepartamento.setNome("");
+                        else if(i == 11) {
                             String[] column11 = actualColumn.split(",");
                             colunaDepartamento.setNome(column11[0]);
                         }
