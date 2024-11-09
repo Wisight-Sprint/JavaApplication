@@ -26,7 +26,6 @@ public class DatasetToDatabase {
     ServiceS3 serviceS3 = new ServiceS3(connectionProviderS3);
 
     private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
-        //SELECT E INSERT PARA CIDADE_ESTADO
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
         if (cidades.isEmpty()) {
@@ -37,9 +36,7 @@ public class DatasetToDatabase {
         }
 
         System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.get(0).getCidade_estado_id()));
-        //FIM
 
-        //SELECT E INSERT PARA DEPARTAMENTO
         List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                 new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
         if (departamentos.isEmpty()) {
@@ -51,9 +48,7 @@ public class DatasetToDatabase {
                     new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
         }
         System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
-        //FIM
 
-        //SELECT E INSERT PARA RELATORIO
         List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
                 new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0).getDepartamento_id());
         if (relatorios.isEmpty()) {
@@ -64,9 +59,7 @@ public class DatasetToDatabase {
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco. Id: " + relatorios.get(0));
         }
         System.out.printf("Id de relatório: %d%n", relatorios.get(0).getRelatorio_id());
-        //FIM
 
-        //SELECT E INSERT PARA VITIMA
         List<Vitima> vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
                 new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
         if (vitimas.isEmpty()) {
@@ -85,7 +78,6 @@ public class DatasetToDatabase {
     }
 
     public void extractAndInsert() {
-
         String bucket = serviceS3.getFirstBucket();
         String key = serviceS3.getFirstObject(bucket);
 
@@ -97,16 +89,30 @@ public class DatasetToDatabase {
 
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) {
+                if (row.getRowNum() == 0)
                     continue;
-                }
 
                 String[] rowData = new String[row.getPhysicalNumberOfCells()];
 
-
                 for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
                     Cell cell = row.getCell(i);
-                    String actualColumn = cell.getStringCellValue();
+                    String actualColumn = "";
+
+                    if (cell != null) {
+                        switch (cell.getCellType()) {
+                            case STRING:
+                                actualColumn = cell.getStringCellValue();
+                                break;
+                            case NUMERIC:
+                                actualColumn = String.valueOf(cell.getNumericCellValue());
+                                break;
+                            case BOOLEAN:
+                                actualColumn = String.valueOf(cell.getBooleanCellValue());
+                                break;
+                            default:
+                                actualColumn = "";
+                        }
+                    }
 
                     if (i == 0 && actualColumn.contains("2024")) {
 
