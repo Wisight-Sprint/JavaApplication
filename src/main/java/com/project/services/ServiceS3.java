@@ -1,18 +1,12 @@
 package com.project.services;
 
 import com.project.provider.ConnectionProviderS3;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
-import java.io.File;
 import java.io.InputStream;
-import java.nio.file.Files;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class ServiceS3 {
 

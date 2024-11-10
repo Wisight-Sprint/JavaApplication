@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.*;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -87,84 +86,70 @@ public class DatasetToDatabase {
             Sheet sheet = workbook.getSheetAt(0);
             SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
 
-
             for (Row row : sheet) {
                 if (row.getRowNum() == 0)
                     continue;
 
-                String[] rowData = new String[row.getPhysicalNumberOfCells()];
+                Cell cell0 = row.getCell(0);
+                Cell cell1 = row.getCell(1);
+                Cell cell2 = row.getCell(2);
+                Cell cell3 = row.getCell(3);
+                Cell cell4 = row.getCell(4);
+                Cell cell5 = row.getCell(5);
+                Cell cell6 = row.getCell(6);
+                Cell cell7 = row.getCell(7);
+                Cell cell8 = row.getCell(8);
+                Cell cell9 = row.getCell(9);
+                Cell cell10 = row.getCell(10);
+                Cell cell11 = row.getCell(11);
 
-                for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
-                    Cell cell = row.getCell(i);
-                    String actualColumn = "";
+                Date cellDtOcorrencia;
+                if (cell0 != null && cell0.getCellType() == CellType.NUMERIC)
+                    cellDtOcorrencia = cell0.getDateCellValue();
+                else if (cell0 != null && cell0.getCellType() == CellType.STRING)
+                    cellDtOcorrencia = formato.parse(cell0.getStringCellValue());
+                else
+                    cellDtOcorrencia = new Date();
 
-                    if (cell != null) {
-                        switch (cell.getCellType()) {
-                            case STRING:
-                                actualColumn = cell.getStringCellValue();
-                                break;
-                            case NUMERIC:
-                                actualColumn = String.valueOf(cell.getNumericCellValue());
-                                break;
-                            case BOOLEAN:
-                                actualColumn = String.valueOf(cell.getBooleanCellValue());
-                                break;
-                            default:
-                                actualColumn = "";
-                        }
-                    }
+                Date dtLimite;
+                dtLimite = formato.parse("2024-01-01");
 
-                    if (i == 0 && actualColumn.contains("2024")) {
+                if (cellDtOcorrencia.before(dtLimite))
+                    continue;
 
-                        if (i == 0 && actualColumn == null || actualColumn.isBlank())
-                            colunaRelatorio.setDataOcorrencia(new Date());
-                        else if(i == 0) {
-                            Date dataFormatada = formato.parse(actualColumn);
-                            colunaRelatorio.setDataOcorrencia(dataFormatada);
-                        }
+                String cellNomeVitima = (cell1 != null && cell1.getCellType() == CellType.STRING) ? cell1.getStringCellValue() : "";
+                Integer cellIdadeVitima = (cell2 != null && cell2.getCellType() == CellType.NUMERIC) ? (int) cell2.getNumericCellValue() : 0;
+                String cellGeneroVitima = (cell3 != null && cell3.getCellType() == CellType.STRING) ? cell3.getStringCellValue() : "";
+                String cellArmamento = (cell4 != null && cell4.getCellType() == CellType.STRING) ? cell4.getStringCellValue() : "";
+                String cellEtniaVitima = (cell5 != null && cell5.getCellType() == CellType.STRING) ? cell5.getStringCellValue() : "";
+                String cellCidade = (cell6 != null && cell6.getCellType() == CellType.STRING) ? cell6.getStringCellValue() : "";
+                String cellEstado = (cell7 != null && cell7.getCellType() == CellType.STRING) ? cell7.getStringCellValue() : "";
+                String cellFuga = (cell8 != null && cell8.getCellType() == CellType.STRING) ? cell8.getStringCellValue() : "";
+                Boolean cellCameraCorporal = (cell9 != null && cell9.getCellType() == CellType.STRING) ? Boolean.valueOf(cell9.getStringCellValue()) : null;
+                Boolean cellProblemasMentais = (cell10 != null && cell10.getCellType() == CellType.STRING) ? Boolean.valueOf(cell10.getStringCellValue()) : null;
+                String cellDepartamentoNome = (cell11 != null && cell11.getCellType() == CellType.STRING) ? cell11.getStringCellValue() : "";
 
-                        if (i == 1 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setNome("");
-                        else if(i == 1) colunaVitima.setNome(actualColumn);
-                        if (i == 2 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setIdade(0);
-                        else if(i == 2) colunaVitima.setIdade(Integer.valueOf(actualColumn));
-                        if (i == 3 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setGenero("");
-                        else if(i == 3) colunaVitima.setGenero(actualColumn);
-                        if (i == 4 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setArmamento("");
-                        else if(i == 4) colunaVitima.setArmamento(actualColumn);
-                        if (i == 5 && actualColumn.isBlank() || actualColumn == null) colunaVitima.setEtnia("");
-                        else if(i == 5) colunaVitima.setEtnia(actualColumn);
-                        if (i == 6 && actualColumn.isBlank() || actualColumn == null) colunaCidadeEstado.setCidade("");
-                        else if(i == 6) colunaCidadeEstado.setCidade(actualColumn);
-                        if (i == 7 && actualColumn.isBlank() || actualColumn == null) colunaCidadeEstado.setEstado("");
-                        else if(i == 7) colunaCidadeEstado.setEstado(actualColumn);
-                        if (i == 8 && actualColumn.isBlank() || actualColumn == null) colunaRelatorio.setFuga("");
-                        else if(i == 8) colunaRelatorio.setFuga(actualColumn);
-                        if (i == 9 && actualColumn.isBlank() || actualColumn == null) colunaRelatorio.setCameraCorporal(null);
-                        else if(i == 9) colunaRelatorio.setCameraCorporal(Boolean.valueOf(actualColumn));
-                        if (i == 10 && actualColumn.isBlank() || actualColumn == null) colunaRelatorio.setProblemasMentais(null);
-                        else if(i == 10) colunaRelatorio.setProblemasMentais(Boolean.valueOf(actualColumn));
 
-                        if (i == 11 && actualColumn.isBlank() || actualColumn == null) colunaDepartamento.setNome("");
-                        else if(i == 11) {
-                            String[] column11 = actualColumn.split(",");
-                            colunaDepartamento.setNome(column11[0]);
-                        }
-                    }
-                }
+                colunaCidadeEstado.setCidade(cellCidade);
+                colunaCidadeEstado.setEstado(cellEstado);
+                colunaDepartamento.setNome(cellDepartamentoNome);
+
+                colunaRelatorio.setDataOcorrencia(cellDtOcorrencia);
+                colunaRelatorio.setFuga(cellFuga);
+                colunaRelatorio.setCameraCorporal(cellCameraCorporal);
+                colunaRelatorio.setProblemasMentais(cellProblemasMentais);
+
+                colunaVitima.setNome(cellNomeVitima);
+                colunaVitima.setIdade(cellIdadeVitima);
+                colunaVitima.setGenero(cellGeneroVitima);
+                colunaVitima.setArmamento(cellArmamento);
+                colunaVitima.setEtnia(cellEtniaVitima);
+
                 insertIntoDatabase(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("-----------");
-        System.out.println("Inserção finalizada");
-
+        System.out.println("-----------\nInserção finalizada");
     }
 }
-
-
-
-
-
-
