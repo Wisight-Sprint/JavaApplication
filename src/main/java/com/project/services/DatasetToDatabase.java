@@ -21,10 +21,22 @@ public class DatasetToDatabase {
 
     DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
+
     ConnectionProviderS3 connectionProviderS3 = new ConnectionProviderS3();
     ServiceS3 serviceS3 = new ServiceS3(connectionProviderS3);
 
-    private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) {
+    String bucket = serviceS3.getFirstBucket();
+    String xlsxKey = serviceS3.getFirstXlsxKey(bucket);
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    BufferedWriter writerlog = new BufferedWriter(new OutputStreamWriter(byteArrayOutputStream));
+
+    Integer logLineCounter = 0;
+
+    public DatasetToDatabase() throws IOException {
+    }
+
+    private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) throws IOException {
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
         if (cidades.isEmpty()) {
@@ -70,17 +82,17 @@ public class DatasetToDatabase {
         System.out.println("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
         //FIM
 
+        logLineCounter++;
+        writerlog.write("Linha %d do dataset inserida no banco\n".formatted(logLineCounter));
+
         cidades.clear();
         departamentos.clear();
         relatorios.clear();
         vitimas.clear();
     }
 
-    public void extractAndInsert() {
-        String bucket = serviceS3.getFirstBucket();
-        String key = serviceS3.getFirstObject(bucket);
-
-        try (InputStream inputStream = serviceS3.getObjectInputStream(bucket, key);
+    public void extractAndInsert() throws IOException {
+        try (InputStream inputStream = serviceS3.getObjectInputStream(bucket, xlsxKey);
              Workbook workbook = new XSSFWorkbook(inputStream)) {
 
             Sheet sheet = workbook.getSheetAt(0);
@@ -150,6 +162,13 @@ public class DatasetToDatabase {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        writerlog.write("Inserção de dados finalizada");
+
+        String logKey = serviceS3.createLogKey();
+        serviceS3.createLog(bucket, logKey, byteArrayOutputStream);
+
         System.out.println("-----------\nInserção finalizada");
     }
+
 }
