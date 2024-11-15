@@ -13,7 +13,7 @@ public class Config {
         if (environment.equals("prod")) {
             String[] variaveisAmbiente = {
                     "DBHOST", "DBPORT", "DBNAME", "DBURL", "DBDRIVER", "DBUSER", "DBPASSWORD",
-                    "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"
+                    "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "TOKEN_SLACK"
             };
 
             for (String chave : variaveisAmbiente) {
