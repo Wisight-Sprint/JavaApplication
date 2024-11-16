@@ -36,6 +36,11 @@ public class DatasetToDatabase {
     public DatasetToDatabase() throws IOException {
     }
 
+    private void writeLog(String message) throws IOException {
+        writerlog.write(message + "\n");
+        writerlog.flush();
+    }
+
     private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) throws IOException {
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
@@ -45,7 +50,6 @@ public class DatasetToDatabase {
             cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                     new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
         }
-
         System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.get(0).getCidade_estado_id()));
 
         List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
@@ -58,6 +62,7 @@ public class DatasetToDatabase {
             departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                     new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
         }
+
         System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
 
         List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
@@ -69,6 +74,7 @@ public class DatasetToDatabase {
                     new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0).getDepartamento_id());
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco. Id: " + relatorios.get(0));
         }
+
         System.out.printf("Id de relatório: %d%n", relatorios.get(0).getRelatorio_id());
 
         List<Vitima> vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
@@ -80,15 +86,15 @@ public class DatasetToDatabase {
                     new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
         }
         System.out.println("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
-        //FIM
-
         logLineCounter++;
-        writerlog.write("Linha %d do dataset inserida no banco\n".formatted(logLineCounter));
+        writeLog("Linha %d do dataset inserida no banco".formatted(logLineCounter));
+        //FIM
 
         cidades.clear();
         departamentos.clear();
         relatorios.clear();
         vitimas.clear();
+
     }
 
     public void extractAndInsert() throws IOException {
@@ -141,7 +147,6 @@ public class DatasetToDatabase {
                 Boolean cellProblemasMentais = (cell10 != null && cell10.getCellType() == CellType.STRING) ? Boolean.valueOf(cell10.getStringCellValue()) : null;
                 String cellDepartamentoNome = (cell11 != null && cell11.getCellType() == CellType.STRING) ? cell11.getStringCellValue() : "";
 
-
                 colunaCidadeEstado.setCidade(cellCidade);
                 colunaCidadeEstado.setEstado(cellEstado);
                 colunaDepartamento.setNome(cellDepartamentoNome);
@@ -159,16 +164,16 @@ public class DatasetToDatabase {
 
                 insertIntoDatabase(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            writerlog.flush();
+            String logKey = serviceS3.createLogKey();
+            serviceS3.createLog(bucket, logKey, byteArrayOutputStream);
         }
 
-        writerlog.write("Inserção de dados finalizada");
-
-        String logKey = serviceS3.createLogKey();
-        serviceS3.createLog(bucket, logKey, byteArrayOutputStream);
-
         System.out.println("-----------\nInserção finalizada");
+        writerlog.close();
     }
-
 }
