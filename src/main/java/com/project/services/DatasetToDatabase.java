@@ -32,7 +32,6 @@ public class DatasetToDatabase {
     BufferedWriter writerlog = new BufferedWriter(new OutputStreamWriter(byteArrayOutputStream));
 
     Integer logLineCounter = 0;
-
     public DatasetToDatabase() throws IOException {
     }
 
@@ -41,7 +40,10 @@ public class DatasetToDatabase {
         writerlog.flush();
     }
 
+
+
     private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) throws IOException {
+        boolean inserted = false;
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                 new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
         if (cidades.isEmpty()) {
@@ -49,6 +51,7 @@ public class DatasetToDatabase {
             System.out.println("Linha inserida na tabela CidadeEstado com sucesso no banco.");
             cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                     new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
+            inserted = true;
         }
         System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.get(0).getCidade_estado_id()));
 
@@ -61,6 +64,7 @@ public class DatasetToDatabase {
             System.out.println("--------------------------------------------------------------------------------------");
             departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                     new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
+            inserted = true;
         }
 
         System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
@@ -73,6 +77,7 @@ public class DatasetToDatabase {
             relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
                     new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0).getDepartamento_id());
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco. Id: " + relatorios.get(0));
+            inserted = true;
         }
 
         System.out.printf("Id de relatório: %d%n", relatorios.get(0).getRelatorio_id());
@@ -84,10 +89,16 @@ public class DatasetToDatabase {
             System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
             vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
                     new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
+            inserted = true;
         }
         System.out.println("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
         logLineCounter++;
-        writeLog("Linha %d do dataset inserida no banco".formatted(logLineCounter));
+
+        if (inserted) {
+            writeLog("Linha %d do DataSet inserida no banco".formatted(logLineCounter));
+        } else {
+            writeLog("Linha %d do DataSet lida no banco".formatted(logLineCounter));
+        }
         //FIM
 
         cidades.clear();
