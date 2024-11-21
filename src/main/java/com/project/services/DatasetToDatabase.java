@@ -156,7 +156,10 @@ public class DatasetToDatabase {
                 String cellFuga = (cell8 != null && cell8.getCellType() == CellType.STRING) ? cell8.getStringCellValue() : "";
                 Boolean cellCameraCorporal = (cell9 != null && cell9.getCellType() == CellType.STRING) ? Boolean.valueOf(cell9.getStringCellValue()) : null;
                 Boolean cellProblemasMentais = (cell10 != null && cell10.getCellType() == CellType.STRING) ? Boolean.valueOf(cell10.getStringCellValue()) : null;
-                String cellDepartamentoNome = (cell11 != null && cell11.getCellType() == CellType.STRING) ? cell11.getStringCellValue() : "";
+
+                String[] nomePrimeiroDep = new String[]{(cell11 != null && cell11.getCellType() == CellType.STRING) ? cell11.getStringCellValue() : ""};
+                nomePrimeiroDep = nomePrimeiroDep[0].split(",");
+                String cellDepartamentoNome = nomePrimeiroDep[0].trim();
 
                 colunaCidadeEstado.setCidade(cellCidade);
                 colunaCidadeEstado.setEstado(cellEstado);
