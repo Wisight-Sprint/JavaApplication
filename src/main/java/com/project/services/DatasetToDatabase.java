@@ -146,16 +146,24 @@ public class DatasetToDatabase {
                 if (cellDtOcorrencia.before(dtLimite))
                     continue;
 
-                String cellNomeVitima = (cell1 != null && cell1.getCellType() == CellType.STRING) ? cell1.getStringCellValue() : "";
+                String cellNomeVitima = (cell1 != null && cell1.getCellType() == CellType.STRING) ? cell1.getStringCellValue().toUpperCase() : "";
                 Integer cellIdadeVitima = (cell2 != null && cell2.getCellType() == CellType.NUMERIC) ? (int) cell2.getNumericCellValue() : 0;
-                String cellGeneroVitima = (cell3 != null && cell3.getCellType() == CellType.STRING) ? cell3.getStringCellValue() : "";
-                String cellArmamento = (cell4 != null && cell4.getCellType() == CellType.STRING) ? cell4.getStringCellValue() : "";
-                String cellEtniaVitima = (cell5 != null && cell5.getCellType() == CellType.STRING) ? cell5.getStringCellValue() : "";
-                String cellCidade = (cell6 != null && cell6.getCellType() == CellType.STRING) ? cell6.getStringCellValue() : "";
-                String cellEstado = (cell7 != null && cell7.getCellType() == CellType.STRING) ? cell7.getStringCellValue() : "";
-                String cellFuga = (cell8 != null && cell8.getCellType() == CellType.STRING) ? cell8.getStringCellValue() : "";
+                String cellGeneroVitima = (cell3 != null && cell3.getCellType() == CellType.STRING) ? cell3.getStringCellValue().toUpperCase() : "";
+                String cellArmamento = (cell4 != null && cell4.getCellType() == CellType.STRING) ? cell4.getStringCellValue().toUpperCase() : "";
+                String cellEtniaVitima = (cell5 != null && cell5.getCellType() == CellType.STRING) ? cell5.getStringCellValue().toUpperCase() : "";
+                String cellCidade = (cell6 != null && cell6.getCellType() == CellType.STRING) ? cell6.getStringCellValue().toUpperCase() : "";
+                String cellEstado = (cell7 != null && cell7.getCellType() == CellType.STRING) ? cell7.getStringCellValue().toUpperCase() : "";
+                String cellFuga = (cell8 != null && cell8.getCellType() == CellType.STRING) ? cell8.getStringCellValue().toUpperCase() : "";
                 Boolean cellCameraCorporal = (cell9 != null && cell9.getCellType() == CellType.STRING) ? Boolean.valueOf(cell9.getStringCellValue()) : null;
                 Boolean cellProblemasMentais = (cell10 != null && cell10.getCellType() == CellType.STRING) ? Boolean.valueOf(cell10.getStringCellValue()) : null;
+
+                cellNomeVitima = cellNomeVitima.replaceAll(" ", "");
+                cellGeneroVitima = cellGeneroVitima.replaceAll(" ", "");
+                cellArmamento = cellArmamento.replaceAll(" ", "");
+                cellEtniaVitima = cellEtniaVitima.replaceAll(" ", "");
+                cellCidade = cellCidade.replaceAll(" ", "");
+                cellEstado = cellEstado.replaceAll(" ", "");
+                cellFuga = cellFuga.replaceAll(" ", "");
 
                 String[] nomePrimeiroDep = new String[]{(cell11 != null && cell11.getCellType() == CellType.STRING) ? cell11.getStringCellValue() : ""};
                 nomePrimeiroDep = nomePrimeiroDep[0].split(",");
