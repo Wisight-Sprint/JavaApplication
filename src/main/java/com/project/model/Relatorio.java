@@ -6,7 +6,6 @@ public class Relatorio {
     private Date dataOcorrencia;
     private String fuga;
     private Boolean cameraCorporal;
-    private Boolean problemasMentais;
     private Integer relatorio_id;
 
     public Relatorio() {
@@ -39,14 +38,6 @@ public class Relatorio {
         this.cameraCorporal = cameraCorporal;
     }
 
-    public Boolean getProblemasMentais() {
-        return problemasMentais;
-    }
-
-    public void setProblemasMentais(Boolean problemasMentais) {
-        this.problemasMentais = problemasMentais;
-    }
-
     public Integer getRelatorio_id() {
         return relatorio_id;
     }
@@ -61,7 +52,6 @@ public class Relatorio {
                 "dataOcorrencia=" + dataOcorrencia +
                 ", fuga='" + fuga + '\'' +
                 ", cameraCorporal=" + cameraCorporal +
-                ", problemasMentais=" + problemasMentais +
                 ", relatorio_id=" + relatorio_id +
                 '}';
     }
