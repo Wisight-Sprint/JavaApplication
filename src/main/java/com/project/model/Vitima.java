@@ -1,6 +1,6 @@
 package com.project.model;
 
-public class Vitima {
+public class Vitima extends Tratativa{
     private String nome;
     private Integer idade;
     private String etnia;
@@ -8,10 +8,14 @@ public class Vitima {
     private String armamento;
     private Integer vitima_id;
 
-    public Vitima() {
-    }
+    public Vitima() {}
 
-    public Vitima(Vitima colunaVitima) {
+    public Vitima(Vitima colunaVitima) {}
+
+    @Override
+    public String tratativaDados() {
+        return null;
+        
     }
 
     public String getNome() {
