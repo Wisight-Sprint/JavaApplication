@@ -1,15 +1,18 @@
 package com.project.model;
 
-public class Departamento {
+public class Departamento extends Tratativa{
     private String nome;
     private Integer departamento_id;
 
-    public Departamento() {
-    }
+    public Departamento() {}
 
-    public Departamento(Departamento colunaDepartamento) {
-    }
+    public Departamento(Departamento colunaDepartamento) {}
 
+    @Override
+    public String tratativaDados() {
+        return null;
+
+    }
 
     public String getNome() {
         return nome;

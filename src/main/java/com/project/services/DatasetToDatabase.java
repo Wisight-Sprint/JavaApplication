@@ -40,8 +40,6 @@ public class DatasetToDatabase {
         writerlog.flush();
     }
 
-
-
     private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) throws IOException {
         boolean inserted = false;
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
