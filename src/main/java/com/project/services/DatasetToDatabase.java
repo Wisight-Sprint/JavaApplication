@@ -67,12 +67,12 @@ public class DatasetToDatabase {
 
         System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
 
-        List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND fk_departamento = ?",
+        List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_relatorio = ? AND fuga = ? AND camera_corporal = ? AND fk_departamento = ?",
                 new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
         if (relatorios.isEmpty()) {
-            connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, fk_departamento) VALUES (?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
+            connection.update("INSERT INTO relatorio (dt_relatorio, fuga, camera_corporal, fk_departamento) VALUES (?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
             System.out.println("Connection update teste" + connection);
-            relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND fk_departamento = ?",
+            relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_relatorio = ? AND fuga = ? AND camera_corporal = ? AND fk_departamento = ?",
                     new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco. Id: " + relatorios.get(0));
             inserted = true;
@@ -141,7 +141,7 @@ public class DatasetToDatabase {
                     cellDtOcorrencia = new Date();
 
                 Date dtLimite;
-                dtLimite = formato.parse("2024-01-01");
+                dtLimite = formato.parse("2023-01-01");
 
                 if (cellDtOcorrencia.before(dtLimite))
                     continue;

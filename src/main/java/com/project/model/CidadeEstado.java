@@ -4,7 +4,6 @@ public class CidadeEstado extends Tratativa{
     private String cidade;
     private String estado;
     private Integer cidade_estado_id;
-    private final CidadeEstado colunaCidadeEstado = new CidadeEstado();
 
     public CidadeEstado() {}
 
