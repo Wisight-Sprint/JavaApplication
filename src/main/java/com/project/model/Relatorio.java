@@ -2,16 +2,20 @@ package com.project.model;
 
 import java.util.Date;
 
-public class Relatorio {
+public class Relatorio extends Tratativa{
     private Date dataOcorrencia;
     private String fuga;
     private Boolean cameraCorporal;
     private Integer relatorio_id;
 
-    public Relatorio() {
-    }
+    public Relatorio() {}
 
-    public Relatorio(Relatorio colunaRelatorio) {
+    public Relatorio (Relatorio colunaRelatorio) {}
+
+    @Override
+    public String tratativaDados() {
+        return null;
+
     }
 
     public Date getDataOcorrencia() {
