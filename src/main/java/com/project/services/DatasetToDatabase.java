@@ -67,24 +67,26 @@ public class DatasetToDatabase {
 
         System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
 
-        List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
-                new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0).getDepartamento_id());
+        List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND fk_departamento = ?",
+                new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
         if (relatorios.isEmpty()) {
-            connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, problemas_mentais, fk_departamento) VALUES (?, ?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0).getDepartamento_id());
+            connection.update("INSERT INTO relatorio (dt_ocorrencia, fuga, camera_corporal, fk_departamento) VALUES (?, ?, ?, ?)", relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
             System.out.println("Connection update teste" + connection);
-            relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND problemas_mentais = ? AND fk_departamento = ?",
-                    new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), relatorio.getProblemasMentais(), departamentos.get(0).getDepartamento_id());
+            relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_ocorrencia = ? AND fuga = ? AND camera_corporal = ? AND fk_departamento = ?",
+                    new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco. Id: " + relatorios.get(0));
             inserted = true;
         }
 
         System.out.printf("Id de relatório: %d%n", relatorios.get(0).getRelatorio_id());
 
-        List<Vitima> vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
-                new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
+        List<Vitima> vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ? AND problemas_mentais = ?",
+                new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitima.getProblemasMentais());
         if (vitimas.isEmpty()) {
-            connection.update("INSERT INTO vitima (nome, idade, etnia, genero, armamento, fk_relatorio, fk_departamento) VALUES (?, ?, ?, ?, ?, ?, ?)", vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), relatorios.get(0).getRelatorio_id(), departamentos.get(0).getDepartamento_id());
+            connection.update("INSERT INTO vitima (nome, idade, etnia, genero, armamento, problemas_mentais, fk_relatorio) VALUES (?, ?, ?, ?, ?, ?, ?)", vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitima.getProblemasMentais(), relatorios.get(0).getRelatorio_id());
             System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
+            vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ? AND problemas_mentais = ?",
+                    new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitima.getProblemasMentais());
             vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
                     new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
             inserted = true;
@@ -174,7 +176,7 @@ public class DatasetToDatabase {
                 colunaRelatorio.setDataOcorrencia(cellDtOcorrencia);
                 colunaRelatorio.setFuga(cellFuga);
                 colunaRelatorio.setCameraCorporal(cellCameraCorporal);
-                colunaRelatorio.setProblemasMentais(cellProblemasMentais);
+                colunaVitima.setProblemasMentais(cellProblemasMentais);
 
                 colunaVitima.setNome(cellNomeVitima);
                 colunaVitima.setIdade(cellIdadeVitima);

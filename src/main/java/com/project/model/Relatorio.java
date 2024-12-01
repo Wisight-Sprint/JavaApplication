@@ -6,7 +6,6 @@ public class Relatorio extends Tratativa{
     private Date dataOcorrencia;
     private String fuga;
     private Boolean cameraCorporal;
-    private Boolean problemasMentais;
     private Integer relatorio_id;
 
     public Relatorio() {}
@@ -43,14 +42,6 @@ public class Relatorio extends Tratativa{
         this.cameraCorporal = cameraCorporal;
     }
 
-    public Boolean getProblemasMentais() {
-        return problemasMentais;
-    }
-
-    public void setProblemasMentais(Boolean problemasMentais) {
-        this.problemasMentais = problemasMentais;
-    }
-
     public Integer getRelatorio_id() {
         return relatorio_id;
     }
@@ -65,7 +56,6 @@ public class Relatorio extends Tratativa{
                 "dataOcorrencia=" + dataOcorrencia +
                 ", fuga='" + fuga + '\'' +
                 ", cameraCorporal=" + cameraCorporal +
-                ", problemasMentais=" + problemasMentais +
                 ", relatorio_id=" + relatorio_id +
                 '}';
     }

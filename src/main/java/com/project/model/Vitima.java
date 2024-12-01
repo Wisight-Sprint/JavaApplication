@@ -6,6 +6,7 @@ public class Vitima extends Tratativa{
     private String etnia;
     private String genero;
     private String armamento;
+    private Boolean problemasMentais;
     private Integer vitima_id;
 
     public Vitima() {}
@@ -58,11 +59,32 @@ public class Vitima extends Tratativa{
         this.armamento = armamento;
     }
 
+    public Boolean getProblemasMentais() {
+        return problemasMentais;
+    }
+
+    public void setProblemasMentais(Boolean problemasMentais) {
+        this.problemasMentais = problemasMentais;
+    }
+
     public Integer getVitima_id() {
         return vitima_id;
     }
 
     public void setVitima_id(Integer vitima_id) {
         this.vitima_id = vitima_id;
+    }
+
+    @Override
+    public String toString() {
+        return "Vitima{" +
+                "nome='" + nome + '\'' +
+                ", idade=" + idade +
+                ", etnia='" + etnia + '\'' +
+                ", genero='" + genero + '\'' +
+                ", armamento='" + armamento + '\'' +
+                ", problemasMentais=" + problemasMentais +
+                ", vitima_id=" + vitima_id +
+                '}';
     }
 }
