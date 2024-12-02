@@ -67,6 +67,7 @@ public class DatasetToDatabase {
             inserted = true;
         }
         System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.get(0).getCidade_estado_id()));
+        writeLog("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.get(0).getCidade_estado_id()));
 
         List<Departamento> departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                 new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
@@ -81,6 +82,7 @@ public class DatasetToDatabase {
         }
 
         System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
+        writeLog("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
 
         List<Relatorio> relatorios = connection.query("SELECT relatorio_id FROM relatorio WHERE dt_relatorio = ? AND fuga = ? AND camera_corporal = ? AND fk_departamento = ?",
                 new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
@@ -95,6 +97,7 @@ public class DatasetToDatabase {
         }
 
         System.out.printf("Id de relatório: %d%n", relatorios.get(0).getRelatorio_id());
+        writeLog("Id de relatório: %d%n".formatted(relatorios.get(0).getRelatorio_id()));
 
         List<Vitima> vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ? AND problemas_mentais = ?",
                 new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitima.getProblemasMentais());
@@ -107,6 +110,8 @@ public class DatasetToDatabase {
             verificarSeDepartamentoJaFoiAdicionadoEmNovosDepartamentos(departamento.getNome());
         }
         System.out.println("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
+        writeLog("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
+
         logLineCounter++;
 
         if (inserted) {
@@ -201,11 +206,6 @@ public class DatasetToDatabase {
 
                 insertIntoDatabase(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
             }
-
-            if (getNovosDepartamentos().size() > 0)
-                SlackMessageSender.sendMessageToSlack("Foram registrados novos dados nos departamentos: \n" + getNovosDepartamentos());
-            novosDepartamentos.clear();
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -213,7 +213,10 @@ public class DatasetToDatabase {
             String logKey = serviceS3.createLogKey();
             serviceS3.createLog(bucket, logKey, byteArrayOutputStream);
         }
-
+        if (getNovosDepartamentos().size() > 0) {
+            SlackMessageSender.sendMessageToSlack("Foram registrados novos dados nos departamentos: \n" + getNovosDepartamentos());
+            novosDepartamentos.clear();
+        }
         System.out.println("-----------\nInserção finalizada");
         writerlog.close();
     }
