@@ -54,7 +54,6 @@ public class Relatorio extends Tratativa{
 
                 String cellFuga = (cell8 != null && cell8.getCellType() == CellType.STRING) ? cell8.getStringCellValue().toUpperCase() : "";
                 Boolean cellCameraCorporal = (cell9 != null && cell9.getCellType() == CellType.STRING) ? Boolean.valueOf(cell9.getStringCellValue()) : null;
-                Boolean cellProblemasMentais = (cell10 != null && cell10.getCellType() == CellType.STRING) ? Boolean.valueOf(cell10.getStringCellValue()) : null;
 
                 cellFuga = cellFuga.replaceAll(" ", "");
 
@@ -62,7 +61,6 @@ public class Relatorio extends Tratativa{
 //                colunaRelatorio.setDataOcorrencia(cellDtOcorrencia);
 //                colunaRelatorio.setFuga(cellFuga);
 //                colunaRelatorio.setCameraCorporal(cellCameraCorporal);
-//                colunaRelatorio.setProblemasMentais(cellProblemasMentais);
 //
 //                insertIntoDatabase(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
             }

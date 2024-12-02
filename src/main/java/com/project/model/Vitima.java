@@ -48,6 +48,7 @@ public class Vitima extends Tratativa{
                 Cell cell3 = row.getCell(3);
                 Cell cell4 = row.getCell(4);
                 Cell cell5 = row.getCell(5);
+                Cell cell10 = row.getCell(10);
 
                 Date cellDtOcorrencia;
 
@@ -65,6 +66,7 @@ public class Vitima extends Tratativa{
                 String cellGeneroVitima = (cell3 != null && cell3.getCellType() == CellType.STRING) ? cell3.getStringCellValue().toUpperCase() : "";
                 String cellArmamento = (cell4 != null && cell4.getCellType() == CellType.STRING) ? cell4.getStringCellValue().toUpperCase() : "";
                 String cellEtniaVitima = (cell5 != null && cell5.getCellType() == CellType.STRING) ? cell5.getStringCellValue().toUpperCase() : "";
+                Boolean cellProblemasMentais = (cell10 != null && cell10.getCellType() == CellType.STRING) ? Boolean.valueOf(cell10.getStringCellValue()) : null;
 
                 cellNomeVitima = cellNomeVitima.replaceAll(" ", "");
                 cellGeneroVitima = cellGeneroVitima.replaceAll(" ", "");
@@ -76,6 +78,7 @@ public class Vitima extends Tratativa{
 //                colunaVitima.setGenero(cellGeneroVitima);
 //                colunaVitima.setArmamento(cellArmamento);
 //                colunaVitima.setEtnia(cellEtniaVitima);
+//                colunaRelatorio.setProblemasMentais(cellProblemasMentais);
 //
 //                insertIntoDatabase(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
             }
