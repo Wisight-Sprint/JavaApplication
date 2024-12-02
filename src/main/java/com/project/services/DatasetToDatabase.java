@@ -32,6 +32,7 @@ public class DatasetToDatabase {
     BufferedWriter writerlog = new BufferedWriter(new OutputStreamWriter(byteArrayOutputStream));
 
     Integer logLineCounter = 0;
+
     public DatasetToDatabase() throws IOException {
     }
 
