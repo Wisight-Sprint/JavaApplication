@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class DatasetToDatabase {
     private final Departamento colunaDepartamento = new Departamento();
     private final Vitima colunaVitima = new Vitima();
     private final Relatorio colunaRelatorio = new Relatorio();
+    private final List<String> novosDepartamentos = new ArrayList<>();
 
     DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
@@ -39,6 +41,18 @@ public class DatasetToDatabase {
     private void writeLog(String message) throws IOException {
         writerlog.write(message + "\n");
         writerlog.flush();
+    }
+
+    public void verificarSeDepartamentoJaFoiAdicionadoEmNovosDepartamentos(String nome) {
+        Boolean existe = false;
+        for (String departamentoAtual : novosDepartamentos) {
+            if (departamentoAtual.equals(nome)) existe = true;
+        }
+        if (!existe) novosDepartamentos.add(nome);
+    }
+
+    public List<String> getNovosDepartamentos() {
+        return novosDepartamentos;
     }
 
     private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) throws IOException {
@@ -77,6 +91,7 @@ public class DatasetToDatabase {
                     new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco. Id: " + relatorios.get(0));
             inserted = true;
+            verificarSeDepartamentoJaFoiAdicionadoEmNovosDepartamentos(departamento.getNome());
         }
 
         System.out.printf("Id de relatório: %d%n", relatorios.get(0).getRelatorio_id());
@@ -88,15 +103,15 @@ public class DatasetToDatabase {
             System.out.println("Linha inserida na tabela Vítima com sucesso no banco.");
             vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ? AND problemas_mentais = ?",
                     new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitima.getProblemasMentais());
-            vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ?",
-                    new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento());
             inserted = true;
+            verificarSeDepartamentoJaFoiAdicionadoEmNovosDepartamentos(departamento.getNome());
         }
         System.out.println("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
         logLineCounter++;
 
         if (inserted) {
             writeLog("Linha %d do DataSet inserida no banco".formatted(logLineCounter));
+            if (getNovosDepartamentos().size() > 0) SlackMessageSender.sendMessageToSlack("Foram registrados novos dados nos departamentos: \n" + getNovosDepartamentos());
         } else {
             writeLog("Linha %d do DataSet lida no banco".formatted(logLineCounter));
         }
