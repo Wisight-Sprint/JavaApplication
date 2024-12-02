@@ -111,8 +111,6 @@ public class DatasetToDatabase {
 
         if (inserted) {
             writeLog("Linha %d do DataSet inserida no banco".formatted(logLineCounter));
-            if (getNovosDepartamentos().size() > 0) SlackMessageSender.sendMessageToSlack("Foram registrados novos dados nos departamentos: \n" + getNovosDepartamentos());
-            novosDepartamentos.clear();
         } else {
             writeLog("Linha %d do DataSet lida no banco".formatted(logLineCounter));
         }
@@ -203,6 +201,10 @@ public class DatasetToDatabase {
 
                 insertIntoDatabase(colunaCidadeEstado, colunaDepartamento, colunaRelatorio, colunaVitima);
             }
+
+            if (getNovosDepartamentos().size() > 0)
+                SlackMessageSender.sendMessageToSlack("Foram registrados novos dados nos departamentos: \n" + getNovosDepartamentos());
+            novosDepartamentos.clear();
 
         } catch (Exception e) {
             e.printStackTrace();
