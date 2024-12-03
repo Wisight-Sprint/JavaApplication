@@ -19,7 +19,10 @@ public class DatasetToDatabase {
     private final Departamento colunaDepartamento = new Departamento();
     private final Vitima colunaVitima = new Vitima();
     private final Relatorio colunaRelatorio = new Relatorio();
-    private final List<String> novosDepartamentos = new ArrayList<>();
+    private Integer novasVitimas = 0;
+    private Integer novasCidadeEstado = 0;
+    private Integer novosDepartamentos = 0;
+    private Integer novosRelatorios = 0;
 
     DBConnectionProvider dbConnectionProvider = new DBConnectionProvider();
     JdbcTemplate connection = dbConnectionProvider.getDatabaseConnection();
@@ -43,18 +46,6 @@ public class DatasetToDatabase {
         writerlog.flush();
     }
 
-    public void verificarSeDepartamentoJaFoiAdicionadoEmNovosDepartamentos(String nome) {
-        Boolean existe = false;
-        for (String departamentoAtual : novosDepartamentos) {
-            if (departamentoAtual.equals(nome)) existe = true;
-        }
-        if (!existe) novosDepartamentos.add(nome);
-    }
-
-    public List<String> getNovosDepartamentos() {
-        return novosDepartamentos;
-    }
-
     private void insertIntoDatabase(CidadeEstado cidadeEstado, Departamento departamento, Relatorio relatorio, Vitima vitima) throws IOException {
         boolean inserted = false;
         List<CidadeEstado> cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
@@ -65,6 +56,7 @@ public class DatasetToDatabase {
             cidades = connection.query("SELECT cidade_estado_id FROM cidade_estado WHERE cidade = ? AND estado = ?",
                     new BeanPropertyRowMapper<>(CidadeEstado.class), cidadeEstado.getCidade(), cidadeEstado.getEstado());
             inserted = true;
+            novasCidadeEstado++;
         }
         System.out.println("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.get(0).getCidade_estado_id()));
         writeLog("Id de %s, %s: %d".formatted(cidadeEstado.getCidade(), cidadeEstado.getEstado(), cidades.get(0).getCidade_estado_id()));
@@ -79,6 +71,7 @@ public class DatasetToDatabase {
             departamentos = connection.query("SELECT departamento_id FROM departamento WHERE nome = ?",
                     new BeanPropertyRowMapper<>(Departamento.class), departamento.getNome());
             inserted = true;
+            novosDepartamentos++;
         }
 
         System.out.println("Id de %s: %d".formatted(departamento.getNome(), departamentos.get(0).getDepartamento_id()));
@@ -93,7 +86,7 @@ public class DatasetToDatabase {
                     new BeanPropertyRowMapper<>(Relatorio.class), relatorio.getDataOcorrencia(), relatorio.getFuga(), relatorio.getCameraCorporal(), departamentos.get(0).getDepartamento_id());
             System.out.println("Linha inserida na tabela Relatório com sucesso no banco. Id: " + relatorios.get(0));
             inserted = true;
-            verificarSeDepartamentoJaFoiAdicionadoEmNovosDepartamentos(departamento.getNome());
+            novosRelatorios++;
         }
 
         System.out.printf("Id de relatório: %d%n", relatorios.get(0).getRelatorio_id());
@@ -107,7 +100,7 @@ public class DatasetToDatabase {
             vitimas = connection.query("SELECT vitima_id FROM vitima WHERE nome = ? AND idade = ? AND etnia = ? AND genero = ? AND armamento = ? AND problemas_mentais = ?",
                     new BeanPropertyRowMapper<>(Vitima.class), vitima.getNome(), vitima.getIdade(), vitima.getEtnia(), vitima.getGenero(), vitima.getArmamento(), vitima.getProblemasMentais());
             inserted = true;
-            verificarSeDepartamentoJaFoiAdicionadoEmNovosDepartamentos(departamento.getNome());
+            novasVitimas++;
         }
         System.out.println("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
         writeLog("Id de vítima: %d".formatted(vitimas.get(0).getVitima_id()));
@@ -213,9 +206,16 @@ public class DatasetToDatabase {
             String logKey = serviceS3.createLogKey();
             serviceS3.createLog(bucket, logKey, byteArrayOutputStream);
         }
-        if (getNovosDepartamentos().size() > 0) {
-            SlackMessageSender.sendMessageToSlack("Foram registrados novos dados nos departamentos: \n" + getNovosDepartamentos());
-            novosDepartamentos.clear();
+
+        if (novasCidadeEstado > 0 || novosDepartamentos > 0 || novosRelatorios > 0 || novasVitimas > 0) {
+            SlackMessageSender.sendMessageToSlack("""
+                    Base de dados atualizada. Número de linhas inseridas de:
+                    Cidades e Estados: %d
+                    Departamentos: %d
+                    Relatórios: %d
+                    Vítimas: %d""".formatted(novasCidadeEstado, novosDepartamentos, novosRelatorios, novasVitimas));
+
+            novasCidadeEstado = 0; novosDepartamentos = 0; novosRelatorios = 0; novasVitimas = 0;
         }
         System.out.println("-----------\nInserção finalizada");
         writerlog.close();
